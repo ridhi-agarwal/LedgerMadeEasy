@@ -20,7 +20,7 @@ public interface PartyService {
 
         Party getPartySummary(UUID partyId);
 
-        List<Transaction> getTransactionsForParty(Long partyId);
+        List<Transaction> getTransactionsForParty(UUID partyId);
 
 
 }

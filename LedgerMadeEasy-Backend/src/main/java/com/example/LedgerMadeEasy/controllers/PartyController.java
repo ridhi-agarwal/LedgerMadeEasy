@@ -1,17 +1,16 @@
 package com.example.LedgerMadeEasy.controllers;
 
+import com.example.LedgerMadeEasy.dtos.CreatePartyRequest;
 import com.example.LedgerMadeEasy.dtos.PartyDto;
 import com.example.LedgerMadeEasy.entities.Party;
+import com.example.LedgerMadeEasy.entities.Transaction;
 import com.example.LedgerMadeEasy.mappers.PartyMapper;
-import com.example.LedgerMadeEasy.repositories.PartyRepository;
-import com.example.LedgerMadeEasy.repositories.UserRepository;
 import com.example.LedgerMadeEasy.services.PartyService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,11 +23,26 @@ public class PartyController {
     private final PartyMapper partyMapper;
 
     @GetMapping
-    public ResponseEntity<List<PartyDto>> getPartiesByUser(@RequestParam UUID userId){
-        List<Party> parties =partyService.getPartiesByUser(userId);
-        return ResponseEntity.ok(
-                parties.stream().map(partyMapper::toPartyDto).toList()
-        );
+    public ResponseEntity<List<PartyDto>> getPartiesByUser(@RequestParam UUID userId) {
+        List<Party> parties = partyService.getPartiesByUser(userId);
+        List<PartyDto> result = parties.stream()
+                .map(party -> {
+                    List<Transaction> txns = partyService.getTransactionsForParty(party.getId());
+                    return partyMapper.toPartyDto(party, txns);
+                }).toList();
+
+        return ResponseEntity.ok(result);
     }
+
+    @PostMapping
+    public ResponseEntity<PartyDto> createParty(@RequestParam UUID userId, @Valid @RequestBody CreatePartyRequest createPartyRequest){
+        Party party = partyMapper.toEntity(createPartyRequest);
+        Party saveParty = partyService.createParty(userId, party);
+        return new ResponseEntity<>(partyMapper.toPartyDto(saveParty), HttpStatus.CREATED);
+    }
+
+
+
+
 
 }

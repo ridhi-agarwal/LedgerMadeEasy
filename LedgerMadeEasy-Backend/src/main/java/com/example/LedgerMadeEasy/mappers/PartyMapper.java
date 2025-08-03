@@ -22,6 +22,14 @@ public interface PartyMapper {
     @Mapping(target = "currentBalance", source = "party.balance")
     PartyDto toPartyDto(Party party, List<Transaction> transactions);
 
+    @Mapping(target = "partyId", source = "id")
+    @Mapping(target = "partyName", source = "name")
+    @Mapping(target = "totalCredit", constant = "0.0")
+    @Mapping(target = "totalDebit", constant = "0.0")
+    @Mapping(target = "currentBalance", source = "balance")
+    PartyDto toPartyDto(Party party);
+
+
     @Named("calculateCredit")
     default double calculateCredit(List<Transaction> transactions) {
         if (transactions == null) return 0;

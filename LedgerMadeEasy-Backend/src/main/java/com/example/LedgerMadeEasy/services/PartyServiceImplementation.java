@@ -4,6 +4,7 @@ import com.example.LedgerMadeEasy.entities.Party;
 import com.example.LedgerMadeEasy.entities.Transaction;
 import com.example.LedgerMadeEasy.entities.User;
 import com.example.LedgerMadeEasy.repositories.PartyRepository;
+import com.example.LedgerMadeEasy.repositories.TransactionRepository;
 import com.example.LedgerMadeEasy.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 
@@ -11,9 +12,12 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.antlr.v4.runtime.tree.xpath.XPath.findAll;
+
 public class PartyServiceImplementation implements PartyService{
     private final PartyRepository partyRepository;
     private final UserRepository userRepository;
+    private final TransactionRepository transactionRepository;
 
     @Override
     @Transactional
@@ -51,7 +55,9 @@ public class PartyServiceImplementation implements PartyService{
     }
 
     @Override
-    public List<Transaction> getTransactionsForParty(Long partyId) {
-        return List.of();
+    public List<Transaction> getTransactionsForParty(UUID partyId) {
+        return transactionRepository.findAll().stream()
+                .filter(t -> t.getParty().getId().equals(partyId))
+                .toList();
     }
 }
